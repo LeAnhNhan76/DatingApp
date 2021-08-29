@@ -33,6 +33,11 @@ namespace API
                     _configuration.GetConnectionString("DefaultConnection"));
             });
             services.AddControllers();
+            services.AddCors(options => options.AddPolicy("AllowAll"
+                    , policy => policy.AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .WithOrigins("https://localhost:4200")));
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
@@ -52,6 +57,8 @@ namespace API
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors("AllowAll");
 
             app.UseAuthorization();
 
