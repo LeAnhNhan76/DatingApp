@@ -1,19 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 using API.Data;
 using API.Interfaces;
 using API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace API
@@ -40,11 +39,33 @@ namespace API
             services.AddCors(options => options.AddPolicy("AllowAll"
                     , policy => policy.AllowAnyHeader()
                     .AllowAnyMethod()
-                    .WithOrigins("https://localhost:4200")));
+                    .WithOrigins("https://localhost:4200")));        
 
-            services.AddSwaggerGen(c =>
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options => 
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["TokenKey"])),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+                var security = new Dictionary<string, IEnumerable<string>>
+                {
+                    ["Bearer"] = Array.Empty<string>()
+                };
+                options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme{
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey
+                });
             });
         }
 
@@ -63,6 +84,8 @@ namespace API
             app.UseRouting();
 
             app.UseCors("AllowAll");
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

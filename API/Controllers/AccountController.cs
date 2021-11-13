@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,13 +13,15 @@ namespace API.Controllers
     public class AccountController : BaseApiController
     {
         private readonly ApplicationDbContext _dbContext;
-        public AccountController(ApplicationDbContext dbContext)
+        private readonly ITokenService _tokenService;
+        public AccountController(ApplicationDbContext dbContext, ITokenService tokenService)
         {
             this._dbContext = dbContext;
+            this._tokenService = tokenService;
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<RegisterDto>> Register(RegisterDto registerDto)
+        public async Task<ActionResult<RegisterResponseDto>> Register(RegisterRequestDto registerDto)
         {
             if(await IsUserExists(registerDto.UserName))
             {
@@ -38,16 +41,16 @@ namespace API.Controllers
  
             await _dbContext.SaveChangesAsync();
             
-            var result = new RegisterDto {
+            var result = new RegisterResponseDto {
                 UserName = newUser.UserName,
-                Password = registerDto.Password
+                Token = _tokenService.CreateToken(newUser)
             };
 
             return result;
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(LoginDto loginDto)
+        public async Task<ActionResult<LoginResponseDto>> Login(LoginRequestDto loginDto)
         {
             var user = await _dbContext.AppUsers.SingleOrDefaultAsync(x => x.UserName == loginDto.UserName);
 
@@ -58,7 +61,7 @@ namespace API.Controllers
 
             using var hmac = new HMACSHA512(user.PasswordSalt);
 
-            var computedHash = hmac.ComputeHash(user.PasswordHash);
+            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
 
             for(var i = 0; i < computedHash.Length; i++)
             {
@@ -68,7 +71,12 @@ namespace API.Controllers
                 }
             }
             
-            return Ok("Login is successfully");
+            var result = new LoginResponseDto {
+                UserName = user.UserName,
+                Token = _tokenService.CreateToken(user)
+            };
+
+            return result;
         }
 
         private async Task<bool> IsUserExists(string userName)
