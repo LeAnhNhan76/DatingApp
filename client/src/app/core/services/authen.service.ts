@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { SystemConstants, UrlConstants } from 'src/app/common';
+import { SystemConstants, UrlConstants } from 'src/app/core/common';
 
 @Injectable()
 export class AuthenService {
