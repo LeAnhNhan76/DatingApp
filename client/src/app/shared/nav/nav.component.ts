@@ -11,14 +11,23 @@ export class NavComponent implements OnInit {
   public loggedIn: boolean = false;
   public model: any = {};
 
-  constructor(private _authenService: AuthenService) { }
+  constructor(private authenService: AuthenService) { }
 
   ngOnInit(): void {
+    this.getCurrentUser();
+  }
+
+  getCurrentUser() : void {
+    this.authenService.currentUser$.subscribe((user: any) => {
+      this.loggedIn = !! user;
+    }, (error: any) => {
+      console.log(error);
+    })
   }
 
   login(): void {
     if(this.model && this.model.username && this.model.password) {
-      this._authenService.login(this.model).subscribe((response : any) => {
+      this.authenService.login(this.model).subscribe((response : any) => {
         if(response) {
           this.loggedIn = true;
         }
@@ -29,6 +38,7 @@ export class NavComponent implements OnInit {
   }
   
   logout(): void {
+    this.authenService.logout();
     this.loggedIn = false;
   }
 }

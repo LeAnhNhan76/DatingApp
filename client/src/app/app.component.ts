@@ -1,5 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { SystemConstants } from './core/common';
+import { User } from './core/domain';
+import { AuthenService } from './core/services';
 
 @Component({
   selector: 'app-root',
@@ -7,21 +10,20 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  public title = 'The Dating App';
-  public users: any;  
+  public title = 'The Dating App'; 
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authenService: AuthenService) {}
 
   ngOnInit(): void {
+    this.setCurrentUser();
   }
   
-  getUsers(): void {
-    this.http.get('https://localhost:5001/api/users').subscribe((response: any) => {
-      this.users = response;
-      console.log('users', this.users);
-    }, (errors: any) => {
-      console.log(errors);
-    })
+  setCurrentUser() : void {
+    const userLocalStorage = localStorage.getItem(SystemConstants.CURRENT_USER);
+    if(userLocalStorage) {
+      const currentUser: User = JSON.parse(userLocalStorage);
+      this.authenService.setCurrentUser(currentUser);
+    }
   }
 
 }
