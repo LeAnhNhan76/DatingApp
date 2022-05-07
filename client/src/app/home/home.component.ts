@@ -9,13 +9,10 @@ import { Component, OnInit } from '@angular/core';
 export class HomeComponent implements OnInit {
 
   registerMode: boolean = false;
-  urlGetUsers: string = 'https://localhost:5001/api/users';
-  users: any[] = [];
 
   constructor(private httpClient: HttpClient) { }
 
   ngOnInit(): void {
-    this.getUsers();
   }
 
   registerToggle() {
@@ -27,11 +24,4 @@ export class HomeComponent implements OnInit {
       this.registerMode = false;
     }
   }
-
-  getUsers() : void {
-    this.httpClient.get(this.urlGetUsers).subscribe((users: any) => {
-      this.users = users;
-    });
-  }
-
 }

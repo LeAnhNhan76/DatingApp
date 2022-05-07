@@ -22,6 +22,18 @@ export class AuthenService {
     );
   }
 
+  register(model: any): any {
+    return this.http.post(SystemConstants.BASE_API + UrlConstants.REGISTER, model).pipe(
+      map((user: any) => {
+        if(user) {
+          localStorage.setItem(SystemConstants.CURRENT_USER, JSON.stringify(user));
+          this.setCurrentUser(user);
+        }
+        return user;
+      })
+    )
+  }
+
   setCurrentUser(user: User | null) {
     this.currentUserSource.next(user);
   }
