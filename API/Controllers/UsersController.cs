@@ -1,18 +1,18 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
-using API.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace API.Controllers
 {
     public class UsersController : BaseApiController
     {
         private readonly ApplicationDbContext _dbContext;
+
         public UsersController(ApplicationDbContext dbContext)
         {
             this._dbContext = dbContext;
@@ -21,7 +21,8 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GetUsersResponseDto>>> GetUsers()
         {
-            var result = await _dbContext.AppUsers.Select(x => new GetUsersResponseDto{
+            var result = await _dbContext.AppUsers.Select(x => new GetUsersResponseDto
+            {
                 Id = x.Id,
                 UserName = x.UserName
             }).ToListAsync();
@@ -35,13 +36,14 @@ namespace API.Controllers
         {
             var user = await _dbContext.AppUsers.FirstOrDefaultAsync(x => x.Id == id);
 
-            if(user == null) return new GetUserDetailResponseDto{};
+            if (user == null) return new GetUserDetailResponseDto { };
 
-            var result = new GetUserDetailResponseDto{
+            var result = new GetUserDetailResponseDto
+            {
                 Id = user.Id,
                 UserName = user.UserName
             };
-            
+
             return result;
         }
     }
