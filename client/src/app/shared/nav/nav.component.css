@@ -5,3 +5,12 @@
 .dropdown-toggle, .dropdown-item{
     cursor: pointer;
 }
+
+#home-link {
+    margin-left: 70px;
+}
+
+.dropdown-welcome {
+    position: inherit;
+    right: 50px;
+}
